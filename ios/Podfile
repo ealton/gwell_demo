@@ -1,0 +1,94 @@
+# Uncomment this line to define a global platform for your project
+min_ios_version_supported = "15.6"
+platform :ios, min_ios_version_supported
+
+# Comment the next line if you don't want to use dynamic frameworks
+# Gwell SDK require dynamic frameworks
+use_frameworks!:linkage => :static
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+#  use_frameworks!
+
+  
+  # Section Start: Required by Gwell
+  pod 'CombineCocoa', '0.4.1'  # 为UIKit系列控件提供 Publisher
+  pod 'CombineExt'  # 为 SwiftCombine 提供扩展功能
+  pod 'R.swift'
+  pod 'RxSwift'
+  pod 'RxCocoa'
+  pod 'RTRootNavigationController'
+  pod 'AFNetworking',   '~> 4.0.1'
+  pod 'SDWebImage',     '~> 5.18.2'
+  pod 'lottie-ios',     '~> 4.0'
+  pod 'SSZipArchive'
+  pod 'MJRefresh'
+  pod 'CZImagePreviewer'
+  pod 'MBProgressHUD'
+  pod 'Codextended'
+  pod 'CryptoSwift'
+  pod 'EmptyDataSet-Swift'
+  pod 'FMDB'
+  pod 'Kingfisher'
+  pod 'QTEventBus'
+  pod 'SnapKit'
+  pod 'SwiftyJSON'
+  pod 'Popover'
+  pod 'Then'
+  
+  pod 'GWIoTKit', '= 1.4.8.1', :subspecs => ['Core', 'RQIAPKit']
+#  pod 'GWIoTKit', :subspecs => ['Core', 'RQIAPKit']
+  # Section End
+  
+  
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    
+    # Seciton: Set minimum deployment target
+    target.build_configurations.each do |config|
+      # Use minimum deployment target of 15.6
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+      if target.name == "DophiGoHiLinkIV" || target.name == "DophiGoHiLinkCommon" || target.name == "DophiGoHiLink"
+        # DophiGoHiLink插件宏定义
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = "$(inherited) DH_LAUNCH_FROM_REOQOO=1"
+        config.build_settings['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = "$(inherited) DH_LAUNCH_FROM_REOQOO"
+      end
+      config.build_settings["BUILD_LIBRARY_FOR_DISTRIBUTION"] = "YES"
+    end
+    # End section
+    
+    
+    flutter_additional_ios_build_settings(target)
+  end
+end
