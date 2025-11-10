@@ -29,6 +29,7 @@ class MyApplication : Application() {
 
         // Initialize Firebase before any SDK that uses it
         FirebaseApp.initializeApp(this)
+
     }
 
     fun initGwiot(appId: String, appToken: String) {

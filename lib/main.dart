@@ -101,7 +101,39 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _openMessageCenterPage() async {
     final result = await GwellPlatformChannel().openMessageCenterPage();
-    debugPrint("_processQrCodeContent result: $result");
+    debugPrint("_openMessageCenterPage result: $result");
+    if (result == 0) {
+      _displaySuccess("Success");
+    }
+  }
+
+  void _openCloudServicePage() async {
+    final result = await GwellPlatformChannel().openCloudServicePage();
+    debugPrint("_openCloudServicePage result: $result");
+    if (result == 0) {
+      _displaySuccess("Success");
+    }
+  }
+
+  void _openAlbumPage() async {
+    final result = await GwellPlatformChannel().openAlbumPage();
+    debugPrint("_openCloudServicePage result: $result");
+    if (result == 0) {
+      _displaySuccess("Success");
+    }
+  }
+
+  void _openDeviceUpdatePage() async {
+    final result = await GwellPlatformChannel().openDeviceUpdatePage();
+    debugPrint("_openDeviceUpdatePage result: $result");
+    if (result == 0) {
+      _displaySuccess("Success");
+    }
+  }
+
+  void _openDeviceSharePage() async {
+    final result = await GwellPlatformChannel().openDeviceSharePage();
+    debugPrint("_openDeviceSharePage result: $result");
     if (result == 0) {
       _displaySuccess("Success");
     }
@@ -125,6 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(onPressed: _login, child: Text("Sign In")),
             TextButton(onPressed: _processQrCodeContent, child: Text("Process QR Code Content")),
             TextButton(onPressed: _openMessageCenterPage, child: Text("Message Center")),
+            TextButton(onPressed: _openAlbumPage, child: Text("Album")),
+            TextButton(onPressed: _openDeviceUpdatePage, child: Text("Device Update")),
+            TextButton(onPressed: _openDeviceSharePage, child: Text("Device Share")),
+            TextButton(onPressed: _openCloudServicePage, child: Text("Cloud Service")),
           ],
         ),
       ),

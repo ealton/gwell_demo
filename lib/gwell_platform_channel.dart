@@ -105,6 +105,30 @@ class GwellPlatformChannel {
     return result ?? -1;
   }
 
+  Future<int> openCloudServicePage() async {
+    final result = await gwChannel.invokeMethod<int>("openGwellCloudServicePage", {});
+    print("openCloudServicePage result: $result");
+    return result ?? -1;
+  }
+
+  Future<int> openAlbumPage() async {
+    final result = await gwChannel.invokeMethod<int>("openGwellAlbumPage", {});
+    print("openAlbumPage result: $result");
+    return result ?? -1;
+  }
+
+  Future<int> openDeviceUpdatePage() async {
+    final result = await gwChannel.invokeMethod<int>("openGwellDeviceUpdatePage", {});
+    print("openDeviceUpdatePage result: $result");
+    return result ?? -1;
+  }
+
+  Future<int> openDeviceSharePage() async {
+    final result = await gwChannel.invokeMethod<int>("openGwellDeviceSharePage", {});
+    print("openDeviceSharePage result: $result");
+    return result ?? -1;
+  }
+
   // Future<int> openDeviceSharingQRCodeProcess(String qrcode) async {
   //   final result = await gwChannel.invokeMethod<int>("openGwellShareQrcode", {"qrcode": qrcode});
   //   print("openDeviceSharingQRCodeProcess result: $result");

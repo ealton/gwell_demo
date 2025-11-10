@@ -46,6 +46,10 @@ class PlatformChannelController {
         // openGwellBindingProcess,
         openGwellBindingQrcode,
         openGwellMessageCenterPage,
+        openGwellCloudServicePage,
+        openGwellAlbumPage,
+        openGwellDeviceUpdatePage,
+        openGwellDeviceSharePage,
     }
 
     /**
@@ -89,6 +93,29 @@ class PlatformChannelController {
                     }
                 }
 
+                MethodChannelFunction.openGwellCloudServicePage.toString() -> {
+                    scope.launch(Dispatchers.IO) {
+                        openGwellCloudServicePage(call, result)
+                    }
+                }
+
+                MethodChannelFunction.openGwellAlbumPage.toString() -> {
+                    scope.launch(Dispatchers.IO) {
+                        openGwellAlbumPage(call, result)
+                    }
+                }
+
+                MethodChannelFunction.openGwellDeviceSharePage.toString() -> {
+                    scope.launch(Dispatchers.IO) {
+                        openGwellDeviceSharePage(call, result)
+                    }
+                }
+
+                MethodChannelFunction.openGwellDeviceUpdatePage.toString() -> {
+                    scope.launch(Dispatchers.IO) {
+                        openGwellDeviceUpdatePage(call, result)
+                    }
+                }
             }
         }
     }
@@ -197,49 +224,97 @@ class PlatformChannelController {
         }
 
         var enableBuiltInHandling = true
-            print("Calling GWIoT.recognizeQRCode($qrcodeContent, $enableBuiltInHandling)")
-            val recognizeRet = GWIoT.recognizeQRCode(qrcodeContent, enableBuiltInHandling)
-            if (recognizeRet is GWResult.Success) {
-                val qrcodeType = recognizeRet.data
-                print("QRCodeScanner recognizeQRCode success: $qrcodeType")
+        infoLog("Calling GWIoT.recognizeQRCode($qrcodeContent, $enableBuiltInHandling)")
+        val recognizeRet = GWIoT.recognizeQRCode(qrcodeContent, enableBuiltInHandling)
+        if (recognizeRet is GWResult.Success) {
+            val qrcodeType = recognizeRet.data
+            infoLog("QRCodeScanner recognizeQRCode success: $qrcodeType")
 
-                if (qrcodeType is QRCodeType.ShareDevice) {
-                    val expireTimestamp = qrcodeType.expireTime.toInt()
-                    val currentTimestampSeconds = System.currentTimeMillis() / 1000;
-                    if (expireTimestamp < currentTimestampSeconds) {
-                        print("qrcode expired")
-                        flutterResult.success(-1)
-                        return
-                    }
-
-                    print("Calling GWIoT.acceptShareDevice($qrcodeType)")
-                    val acceptRet = GWIoT.acceptShareDevice(qrcodeType)
-                    if (acceptRet is GWResult.Failure) {
-                        print("Unable to accept share device: ${acceptRet.err?.message}")
-                        flutterResult.success(-1)
-                        return
-                    }
-
-                    flutterResult.success(0)
-
-                } else if (qrcodeType is QRCodeType.BindDevice) {
-                    // BindDevice were already handled by the previous API
-                    flutterResult.success(0)
-                } else if (qrcodeType is QRCodeType.Unknown) {
+            if (qrcodeType is QRCodeType.ShareDevice) {
+                val expireTimestamp = qrcodeType.expireTime.toInt()
+                val currentTimestampSeconds = System.currentTimeMillis() / 1000;
+                if (expireTimestamp < currentTimestampSeconds) {
+                    infoLog("qrcode expired")
                     flutterResult.success(-1)
+                    return
                 }
-            } else {
+
+                infoLog("Calling GWIoT.acceptShareDevice($qrcodeType)")
+                val acceptRet = GWIoT.acceptShareDevice(qrcodeType)
+                if (acceptRet is GWResult.Failure) {
+                    infoLog("Unable to accept share device: ${acceptRet.err?.message}")
+                    flutterResult.success(-1)
+                    return
+                }
+
+                flutterResult.success(0)
+
+            } else if (qrcodeType is QRCodeType.BindDevice) {
+                // BindDevice were already handled by the previous API
+                flutterResult.success(0)
+            } else if (qrcodeType is QRCodeType.Unknown) {
                 flutterResult.success(-1)
             }
+        } else {
+            flutterResult.success(-1)
+        }
     }
 
     private suspend fun openGwellMessageCenterPage(call: MethodCall, flutterResult: MethodChannel.Result) {
-        infoLog("openGwellSharePage")
+        infoLog("openGwellMessageCenterPage")
         when (val result = GWIoT.openMessageCenterPage()) {
             is GWResult.Success<*> -> {
             }
             is GWResult.Failure<*> -> {
-                infoLog("openGwellSharePage error ${result.err}")
+                infoLog("openGwellMessageCenterPage error ${result.err}")
+            }
+        }
+        flutterResult.success(0)
+    }
+
+    private suspend fun openGwellCloudServicePage(call: MethodCall, flutterResult: MethodChannel.Result) {
+        infoLog("openGwellCloudServicePage")
+        when (val result = GWIoT.openCloudPage(null)) {
+            is GWResult.Success<*> -> {
+            }
+            is GWResult.Failure<*> -> {
+                infoLog("openGwellCloudServicePage error ${result.err}")
+            }
+        }
+        flutterResult.success(0)
+    }
+
+    private suspend fun openGwellAlbumPage(call: MethodCall, flutterResult: MethodChannel.Result) {
+        infoLog("openGwellAlbumPage")
+        when (val result = GWIoT.openAlbum()) {
+            is GWResult.Success<*> -> {
+            }
+            is GWResult.Failure<*> -> {
+                infoLog("openGwellAlbumPage error ${result.err}")
+            }
+        }
+        flutterResult.success(0)
+    }
+
+    private suspend fun openGwellDeviceUpdatePage(call: MethodCall, flutterResult: MethodChannel.Result) {
+        infoLog("openGwellDeviceUpdatePage")
+        when (val result = GWIoT.openBatchUpgradePage()) {
+            is GWResult.Success<*> -> {
+            }
+            is GWResult.Failure<*> -> {
+                infoLog("openGwellDeviceUpdatePage error ${result.err}")
+            }
+        }
+        flutterResult.success(0)
+    }
+
+    private suspend fun openGwellDeviceSharePage(call: MethodCall, flutterResult: MethodChannel.Result) {
+        infoLog("openGwellDeviceSharePage")
+        when (val result = GWIoT.openShareManagerPage()) {
+            is GWResult.Success<*> -> {
+            }
+            is GWResult.Failure<*> -> {
+                infoLog("openGwellDeviceSharePage error ${result.err}")
             }
         }
         flutterResult.success(0)
