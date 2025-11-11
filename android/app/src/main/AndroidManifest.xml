@@ -22,7 +22,7 @@
         android:label="gw_demo"
         android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.Light.NoTitleBar"
+        android:theme="@style/CustomDarkModeTheme"
         tools:replace="android:theme,android:label">
         <activity
             android:name=".MainActivity"

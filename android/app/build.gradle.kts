@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("therouter")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -125,11 +126,13 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.56.2")
     kapt("com.google.dagger:hilt-compiler:2.56.2")
 
+    implementation("cn.therouter:router:1.2.2")
+
     // Gwell IoT API SDK
-    implementation("com.gwell:gwiotapi:1.4.9.0")
+    implementation("com.gwell:gwiotapi:1.4.10.0")
 
     // Yoosee/Gwell Plugin Hub - Google variant
-    implementation("com.yoosee.gw_plugin_hub:impl_main:google-release-6.36.0.0.17") {
+    implementation("com.yoosee.gw_plugin_hub:impl_main:google-release-6.36.0.0.24") {
         exclude(group = "com.google.android.material")
         exclude(group = "com.yoosee.gw_plugin_hub", module = "liblog_release")
         exclude(group = "com.gwell", module = "iotvideo-multiplatform")
@@ -140,7 +143,7 @@ dependencies {
     }
 
     // Reoqoo Plugin Hub - ETI variant
-    implementation("com.reoqoo.gw_plugin_hub:main:eti-release-01.06.01.0.24") {
+    implementation("com.reoqoo.gw_plugin_hub:main:eti-release-01.06.01.0.30") {
         exclude(group = "com.gwell", module = "gwiotapi")
     }
 

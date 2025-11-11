@@ -92,6 +92,7 @@ plugins {
     id("com.android.application") version "8.9.1" apply false
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
     id("com.google.dagger.hilt.android") version "2.56.2" apply false
+    id("cn.therouter.agp8") version "1.2.2" apply false
 //    id("kotlin-android")
 }
 
