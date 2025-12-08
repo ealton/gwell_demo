@@ -61,7 +61,7 @@ target 'Runner' do
   pod 'Popover'
   pod 'Then'
   
-  pod 'GWIoTKit', '= 1.4.8.1', :subspecs => ['Core', 'RQIAPKit']
+  pod 'GWIoTKit', '= 1.5.4.3', :subspecs => ['Core', 'RQIAPKit']
 #  pod 'GWIoTKit', :subspecs => ['Core', 'RQIAPKit']
   # Section End
   

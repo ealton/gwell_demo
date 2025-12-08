@@ -24,6 +24,39 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>$(APP_NAME) requires bluetooth to connect to camera devices.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>$(APP_NAME) requires bluetooth to connect to camera devices.</string>
+	<key>NSBonjourServices</key>
+    <array>
+    	<string>_leboremote._tcp</string>
+    	<string>_adhp._tcp</string>
+    	<string>_me-transferdata._tcp</string>
+    	<string>_bonjour._tcp</string>
+    	<string>_lnp._tcp</string>
+    </array>
+
+	<key>NSCameraUsageDescription</key>
+	<string>$(APP_NAME) requires camera permission to scan the QR codes on camera devices</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>$(APP_NAME) requires to detect cameras on the local network</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>$(APP_NAME) requires location authorization to help camera devices to connect with Wifi during connection process and confirm whether the App enters into ap mode or not (LAN working mode of mobile phone and smart devices) enable or not?</string>
+	<key>NSLocationUsageDescription</key>
+	<string>$(APP_NAME) requires location authorization to help camera devices to connect with Wifi during connection process and confirm whether the App enters into ap mode or not (LAN working mode of mobile phone and smart devices) enable or not?</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>$(APP_NAME) requires location authorization to help camera devices to connect with Wifi during connection process and confirm whether the App enters into ap mode or not (LAN working mode of mobile phone and smart devices) enable or not?</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(APP_NAME) requires microphone to capture audio and enable intercom feature with camera devices</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>$(APP_NAME) requires to save camera device recordings to albums</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>$(APP_NAME) requires to view albums and select a photo as user avatar</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>$(APP_NAME) requires this data to improve the app's features and overall performance</string>
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

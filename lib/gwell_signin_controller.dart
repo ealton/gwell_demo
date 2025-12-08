@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 /// This is supposed to be handled on the server side
 class GwellSignBackendController {
-  Future<Map<String, dynamic>?> customerLogInV2({required String phoneUniqueId}) async {
+  Future<Map<String, dynamic>?> customerLogInV2({required String phoneUniqueId, String unionId = "e2f8f760-dc19-435c-a655-7729a63f0cde"}) async {
     print("GWELL API CustomerLogInV2");
 
     final host = "openapi-sg.dophigo.com";
@@ -30,7 +30,7 @@ class GwellSignBackendController {
       "appId": appId,
       "appToken": appToken,
       "regRegion": "us",
-      "unionId": "e2f8f760-dc19-435c-a655-7729a63f0cde", // user UUID
+      "unionId": unionId, // user UUID
       "uniqueId": phoneUniqueId,
     };
 

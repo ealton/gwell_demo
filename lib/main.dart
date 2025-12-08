@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gw_demo/gwell_platform_channel.dart';
-import 'package:gw_demo/gwell_signin.dart';
+import 'package:gw_demo/gwell_signin_controller.dart';
+import 'package:gw_demo/gwell_signin_dialog.dart';
+
+import 'gwell_device_list_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,15 +64,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isSdkInit = false;
+  bool _isLoggedIn = false;
+  String _unionId = "";
+
   void _initGwSdk() async {
     final result = await GwellPlatformChannel().initSdk();
     debugPrint("initSdk result: $result");
     if (result == 0) {
       _displaySuccess("SDK init success");
+      _isSdkInit = true;
+      setState(() {});
     }
   }
 
   void _login() async {
+    final unionId = (await showDialog<String>(context: context, builder: (context) => const LoginDialogPanel())) ?? "";
+    if (unionId.isEmpty) {
+      _displaySuccess("Missing unionId");
+      return;
+    }
+
     final phoneUniqueId = await GwellPlatformChannel().getMobileDeviceUniqueId();
     debugPrint("phoneUniqueId: $phoneUniqueId");
     final backendController = GwellSignBackendController();
@@ -87,6 +102,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (result == 0) {
       _displaySuccess("login success");
+      _isLoggedIn = true;
+      _unionId = unionId;
+      setState(() {});
+    }
+  }
+
+  void _logout() async {
+    final result = await GwellPlatformChannel().logoutFromGwellAccount();
+    if (result == 0) {
+      _displaySuccess("logout success");
+      _isLoggedIn = false;
+      setState(() {});
     }
   }
 
@@ -94,6 +121,14 @@ class _MyHomePageState extends State<MyHomePage> {
     final qrcode = "https://domain.com/d/?p=PRODUCT_D&u=SKU_NUMBER&mac=F1:F1:F1:F1:F1:F1";
     final result = await GwellPlatformChannel().openDeviceBindingQRCodeProcess(qrcode);
     debugPrint("_processQrCodeContent result: $result");
+    if (result == 0) {
+      _displaySuccess("Success");
+    }
+  }
+
+  void _bindDevice() async {
+    final result = await GwellPlatformChannel().bindDevice();
+    debugPrint("_bingDevice result: $result");
     if (result == 0) {
       _displaySuccess("Success");
     }
@@ -145,22 +180,29 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  void _deviceList() async {
+    await showDialog<String>(context: context, builder: (context) => const DeviceListDialogPanel());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text("GW Demo")),
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(_isLoggedIn ? "UnionId: $_unionId" : "GW Demo")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextButton(onPressed: _initGwSdk, child: Text("Init SDK")),
-            TextButton(onPressed: _login, child: Text("Sign In")),
-            TextButton(onPressed: _processQrCodeContent, child: Text("Process QR Code Content")),
-            TextButton(onPressed: _openMessageCenterPage, child: Text("Message Center")),
-            TextButton(onPressed: _openAlbumPage, child: Text("Album")),
-            TextButton(onPressed: _openDeviceUpdatePage, child: Text("Device Update")),
-            TextButton(onPressed: _openDeviceSharePage, child: Text("Device Share")),
-            TextButton(onPressed: _openCloudServicePage, child: Text("Cloud Service")),
+            if (!_isSdkInit) TextButton(onPressed: _initGwSdk, child: Text("Init SDK")),
+            if (_isSdkInit && !_isLoggedIn) TextButton(onPressed: _login, child: Text("Sign In")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _logout, child: Text("Log Out")),
+            // if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _processQrCodeContent, child: Text("Process QR Code Content")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _bindDevice, child: Text("Bind Device")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _deviceList, child: Text("Query Device List")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _openMessageCenterPage, child: Text("Message Center")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _openAlbumPage, child: Text("Album")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _openDeviceUpdatePage, child: Text("Device Update")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _openDeviceSharePage, child: Text("Device Share")),
+            if (_isSdkInit && _isLoggedIn) TextButton(onPressed: _openCloudServicePage, child: Text("Cloud Service")),
           ],
         ),
       ),

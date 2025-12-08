@@ -1,7 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'gwell_device.dart';
 
 class GwellPlatformChannel {
   static MethodChannel gwChannel = MethodChannel("gw_channel");
@@ -93,6 +96,11 @@ class GwellPlatformChannel {
     return result ?? -1;
   }
 
+  Future<int> logoutFromGwellAccount() async {
+    final result = await gwChannel.invokeMethod<int>("logoutFromGwellAccount", {});
+    return result ?? -1;
+  }
+
   Future<int> openDeviceBindingQRCodeProcess(String qrcode) async {
     final result = await gwChannel.invokeMethod<int>("openGwellBindingQrcode", {"qrcode": qrcode});
     print("openDeviceBindingQRCodeProcess result: $result");
@@ -102,6 +110,12 @@ class GwellPlatformChannel {
   Future<int> openMessageCenterPage() async {
     final result = await gwChannel.invokeMethod<int>("openGwellMessageCenterPage", {});
     print("openMessageCenterPage result: $result");
+    return result ?? -1;
+  }
+
+  Future<int> bindDevice() async {
+    final result = await gwChannel.invokeMethod<int>("bindDevice", {});
+    print("bindDevice result: $result");
     return result ?? -1;
   }
 
@@ -135,46 +149,41 @@ class GwellPlatformChannel {
   //   return result ?? -1;
   // }
   //
-  // Future<List<GwellDevice>> getDeviceList({int retryCount = 0, bool cacheFirst = false}) async {
-  //   await VendorManager().initVendorSdk(VendorType.gwell);
-  //   try {
-  //     List<dynamic>? deviceList = [];
-  //     if (cacheFirst) {
-  //       deviceList = await gwChannel.invokeMethod<List<dynamic>>(VendorMethodChannelFunction.getGwellDeviceListCacheFirst.toShortString(), {});
-  //     } else {
-  //       deviceList = await gwChannel.invokeMethod<List<dynamic>>(VendorMethodChannelFunction.getGwellDeviceList.toShortString(), {});
-  //     }
-  //     if (deviceList == null) {
-  //       return [];
-  //     }
-  //
-  //     final deviceIdList = <String>[];
-  //     final gwellDeviceList = <GwellDevice>[];
-  //     for (var item in deviceList) {
-  //       final gwellDevice = GwellDevice.fromJson(item);
-  //       deviceIdList.add(gwellDevice.deviceId);
-  //       gwellDeviceList.add(gwellDevice);
-  //     }
-  //
-  //     CDebugManager.info("getDeviceList deviceIds: ${deviceIdList.join(',')}");
-  //
-  //     return gwellDeviceList;
-  //   } on PlatformException catch (e) {
-  //     CDebugManager.error("getDeviceList error: $e");
-  //     if (retryCount > 4) {
-  //       // If retried more than 4 times, then consider it failed, return the default empty result
-  //       return [];
-  //     }
-  //     await Future.delayed(const Duration(seconds: 1));
-  //     return getDeviceList(retryCount: retryCount + 1);
-  //   }
-  // }
+  Future<List<GwellDevice>> getDeviceList({int retryCount = 0, bool cacheFirst = false}) async {
+    try {
+      List<dynamic>? deviceList = [];
+      deviceList = await gwChannel.invokeMethod<List<dynamic>>("getGwellDeviceList", {});
+      if (deviceList == null) {
+        return [];
+      }
 
-  // Future<int> openLiveviewPage(String deviceId) async {
-  //   await VendorManager().initVendorSdk(VendorType.gwell);
-  //   final result = await gwChannel.invokeMethod<int>(VendorMethodChannelFunction.openGwellDeviceLiveviewPage.toShortString(), {"deviceId": deviceId});
-  //   return result ?? -1;
-  // }
+      final deviceIdList = <String>[];
+      final gwellDeviceList = <GwellDevice>[];
+      for (var item in deviceList) {
+        final gwellDevice = GwellDevice.fromJson(item);
+        deviceIdList.add(gwellDevice.deviceId);
+        gwellDeviceList.add(gwellDevice);
+      }
+
+      debugPrint("getDeviceList deviceIds: ${deviceIdList.join(',')}");
+
+      return gwellDeviceList;
+    } on PlatformException catch (e) {
+      debugPrint("getDeviceList error: $e");
+      if (retryCount > 4) {
+        // If retried more than 4 times, then consider it failed, return the default empty result
+        return [];
+      }
+      await Future.delayed(const Duration(seconds: 1));
+      return getDeviceList(retryCount: retryCount + 1);
+    }
+  }
+
+  Future<int> openLiveviewPage(String deviceId) async {
+    final result = await gwChannel.invokeMethod<int>("openGwellDeviceLiveviewPage", {"deviceId": deviceId});
+    return result ?? -1;
+  }
+
   //
   // Future<int> openCloudServicePage(String deviceId) async {
   //   await VendorManager().initVendorSdk(VendorType.gwell);

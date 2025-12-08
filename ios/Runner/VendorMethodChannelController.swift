@@ -4,6 +4,16 @@ import GWIoTApi
 import RQCore
 import Vision
 
+class GWDevice: IDevice {
+    var solution: GWIoTApi.Solution
+    var deviceId: String
+
+    init(solution: GWIoTApi.Solution, deviceId: String) {
+        self.solution = solution
+        self.deviceId = deviceId
+    }
+}
+
 class VendorMethodChannelController {
     
     static var isDebug = false
@@ -19,8 +29,12 @@ class VendorMethodChannelController {
         case initGwellSdk
         case getGwellPhoneUniqueId
         case signInToGwellAccount
+        case logoutFromGwellAccount
         case openGwellBindingQrcode
         case openGwellMessageCenterPage
+        case bindDevice
+        case getGwellDeviceList
+        case openGwellDeviceLiveviewPage
     }
     
     /**
@@ -55,6 +69,9 @@ class VendorMethodChannelController {
                     
                 case .signInToGwellAccount:
                     await self.signInToGwellAccount(call: call, flutterResult: result)
+
+                case .logoutFromGwellAccount:
+                    await self.logoutFromGwellAccount(call: call, flutterResult: result)
                     
                 case .openGwellBindingQrcode:
                     await self.openGwellQrcode(
@@ -66,6 +83,15 @@ class VendorMethodChannelController {
                     
                 case .openGwellMessageCenterPage:
                     await self.openGwellMessageCenterPage(call: call, flutterResult: result)
+
+                case .bindDevice:
+                    await self.bindDevice(call: call, flutterResult: result)
+
+                case .getGwellDeviceList:
+                    await self.getGwellDeviceList(call: call, flutterResult: result)
+
+                case .openGwellDeviceLiveviewPage:
+                    await self.openGwellDeviceLiveviewPage(call: call, flutterResult: result)
                     
                 default:
                     result(FlutterMethodNotImplemented)
@@ -110,20 +136,17 @@ class VendorMethodChannelController {
 
         let languageCode = LanguageCode.en
 
-        let cId = "8.3"
-        let opts = GWIoTApi.InitOptions(appConfig: .init(appId: appId, appToken: appToken, appName: appName, cId: cId))
+        let opts = GWIoTApi.InitOptions(appConfig: .init(appId: appId, appToken: appToken))
         opts.language = languageCode
         opts.disableMultipleLogins = true
         opts.disableAccountService = true
-        opts.brandDomain = self.brandDomain
+//        opts.brandDomain = self.brandDomain
         opts.soundOnByDefault = false
         opts.hostConfig = .init(env: .prod)
-        
-        do {
-            let gwResult = try await GWIoT.shared.initialize(opts: opts)
-        } catch let error {
-            Logger.error(content: "\(error)")
-            flutterResult(-1)
+        let gwResult = GWIoT.shared.initialize(opts: opts)
+        guard case .success(_) = gwiot_swiftResult(of: gwResult) else {
+            Logger.info(content: "GWIoT initialize failed")
+            return
         }
 
         /// Configure custom helper page
@@ -225,6 +248,22 @@ class VendorMethodChannelController {
         
         flutterResult(0)
     }
+
+    private func logoutFromGwellAccount(call: FlutterMethodCall, flutterResult: FlutterResult) async {
+        do {
+            let gwResult = try await GWIoT.shared.logout()
+            guard case .success(_) = gwiot_swiftResult(of: gwResult) else {
+                Logger.error(content: "logout failed, return -1")
+                flutterResult(-1)
+                return
+            }
+
+            flutterResult(0)
+        } catch let error {
+            Logger.error(content: "\(error)")
+            flutterResult(-1)
+        }
+    }
     
     /**
      * Process QR code, opens the processing page if QR code is valid.
@@ -300,7 +339,89 @@ class VendorMethodChannelController {
         }
     }
     
-    
+    private func bindDevice(call: FlutterMethodCall, flutterResult: FlutterResult) async {
+        do {
+            let model = "IP3MCB1A"
+            let productList = GWIoT.shared.productList.value
+            if let productListUnwrapped = productList {
+                Logger.info(content: "productList.value has \(productListUnwrapped.count) items")
+                for item in productListUnwrapped {
+                    Logger.info(content: "Current item = \(item)")
+                    if let productItem = item as? ProductInfo {
+                        if productItem.model == model {
+                            Logger.info(content: "Found item = \(item)")
+                            try await GWIoT.shared.openBind(product: productItem)
+                            flutterResult(0)
+                            return
+                        }
+                    }
+                }
+            } else {
+                Logger.error(content: "ProductList is nil")
+            }
+
+            Logger.error(content: "Unable to find \(model) in queryProductList")
+            flutterResult(-1)
+        } catch let error {
+            Logger.error(content: "\(error)")
+            flutterResult(-1)
+        }
+    }
+
+    private func getGwellDeviceList(call: FlutterMethodCall, flutterResult: FlutterResult) async {
+        let user = GWIoT.shared.user.value
+        if user == nil {
+            flutterResult([])
+            return
+        }
+        Logger.debug(content: "User = \(user)")
+
+        do {
+            let gwResult = try await GWIoT.shared.queryDeviceList()
+            guard case let .success(devices) = gwiot_swiftResult(of: gwResult) else {
+                Logger.error(content: "Get device list failed")
+                flutterResult([])
+                return
+            }
+
+            var deviceMapArray: [[String: String]] = []
+            let gwiotDevices = devices as? [GWIoTApi.Device] ?? []
+            for element in gwiotDevices {
+                deviceMapArray.append(encodeGwDevice(gwDevice: element))
+            }
+            flutterResult(deviceMapArray)
+        } catch let error {
+            Logger.error(content: "\(error)")
+            flutterResult(FlutterError(code: "10001", message: "Get device list failed \(error)", details: nil))
+        }
+
+    }
+
+    private func openGwellDeviceLiveviewPage(call: FlutterMethodCall, flutterResult: FlutterResult) async {
+        guard let args = call.arguments as? [String: Any] else {
+            return missingArgumentResultError(flutterResult: flutterResult)
+        }
+
+        guard let deviceId = args["deviceId"] as? String, !deviceId.isEmpty else {
+            return missingArgumentResultError(flutterResult: flutterResult)
+        }
+
+        do {
+            let device = GWDevice(solution: .yoosee, deviceId: deviceId)
+            let opts = OpenPluginOption(device: device)
+            let gwResult = try await GWIoT.shared.openHome(opts: opts)
+            guard case .success(_) = gwiot_swiftResult(of: gwResult) else {
+                Logger.info(content: "openHome failed")
+                flutterResult(-1)
+                return
+            }
+
+            flutterResult(0)
+        } catch let error {
+            Logger.error(content: "\(error)")
+            flutterResult(-1)
+        }
+    }
     
     /**
      * Set SDK language
